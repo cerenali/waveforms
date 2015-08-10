@@ -5,57 +5,73 @@ Minim minim;
 AudioPlayer song;
 BeatDetect beat;
 boolean paused;
+FFT fft;
 int scale;
-int r, g, b;
-int centerX, centerY;
+int h, s, b;
 
 void setup() {
   size(600, 600);
+  pixelDensity(2);
+  colorMode(HSB);
+  noCursor();
   background(0);
   minim = new Minim(this);
   
-  String file = "Synesthesia.mp3";
-  song = minim.loadFile(file, 1024);
+  String file = "04 The Reeling.mp3";
+  song = minim.loadFile(file);
   song.play();
   
   beat = new BeatDetect();
   
+  fft = new FFT(song.bufferSize(), song.sampleRate());
   paused = false;
-  scale = 100;
-  r = 0;
-  g = 0;
-  b = 0;
-  centerX = width/2;
-  centerY = height/2;
+  scale = 70;
+  h = 0;
+  s = 255;
+  b = 255;
 }
 
 void draw() {
   int t = millis();
   
+  fft.forward(song.mix);
+  
+  strokeWeight(5);
+  int c = 0;
+  for (int i = 0; i < width; i++) {
+    h = (int)map(i, 0, width, 0, 255);
+    s = 150;
+    b = 255;
+    stroke(h, s, b);
+    int n = (int)map(i, 0, width, 0, fft.specSize());
+    float lineHeight = fft.getBand(n)*10;
+    line(i, height, i, height - lineHeight);
+  }
+  
   beat.detect(song.mix);
   if (beat.isOnset()) {
-    r = Math.abs((int)(Math.cos(t + t/2) * 200));
-    b = (int)(Math.abs(Math.sin(t + t/10)) * 255);
-    g = Math.abs((int)(Math.tan(t + t/2) * 200));
-    fill(r, g, b, 40);
-    noStroke();
-    rect(0, 0, width, height);
+   h = Math.abs((int)(Math.cos(t + t/2) * 200));
+   s = 255;
+   b = 255;
+   fill(h, s, b, 40);
+   noStroke();
+   rect(0, 0, width, height);
     
-    strokeWeight(4);
-    scale = 200;
+   strokeWeight(4);
+   scale = 100;
   } else {
-    fill(25, 40);
-    noStroke();
-    rect(0, 0, width, height);
+   fill(25, 40);
+   noStroke();
+   rect(0, 0, width, height);
     
-    strokeWeight(2);
-    scale = 100;
+   strokeWeight(2);
+   scale = 70;
   }
-  //strokeWeight(2);
   stroke(255);
   for (int i = 0; i < song.bufferSize() - 1; i++) {
-   line(i, height/2 + song.mix.get(i)*scale,
-       i+1, height/2 + song.mix.get(i+1)*scale);
+  line(i, height/2 + song.mix.get(i)*scale,
+      i+1, height/2 + song.mix.get(i+1)*scale);
+  }
   }
 }
 
