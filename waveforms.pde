@@ -3,9 +3,16 @@ import ddf.minim.analysis.*;
 
 Minim minim;
 AudioPlayer song;
+AudioMetaData meta;
 BeatDetect beat;
-boolean paused;
 FFT fft;
+
+PFont font;
+String songTitle;
+String songArtist;
+String songLength;
+
+boolean paused, showMeta;
 int scale;
 int h, s, b;
 
@@ -24,6 +31,15 @@ void setup() {
   beat = new BeatDetect();
   
   fft = new FFT(song.bufferSize(), song.sampleRate());
+  
+  meta = song.getMetaData();
+  font = loadFont("Monospaced-11.vlw");
+  textFont(font);
+  songTitle = meta.title();
+  songArtist = meta.author();
+  songLength = parseLength(meta.length());
+  
+  showMeta = false;
   paused = false;
   scale = 70;
   h = 0;
@@ -72,6 +88,13 @@ void draw() {
   line(i, height/2 + song.mix.get(i)*scale,
       i+1, height/2 + song.mix.get(i+1)*scale);
   }
+  
+  if (showMeta) {
+    fill(255);
+    textAlign(LEFT);
+    text(songTitle, 10, 18);
+    text(songArtist, 10, 33);
+    text(songLength, 10, 48);
   }
 }
 
@@ -92,4 +115,14 @@ void keyPressed() {
   if (key == 'q') {
     exit();
   }
+}
+
+void mousePressed() {
+  showMeta = !showMeta;
+}
+
+String parseLength(int millis) {
+  int minutes = (int)Math.floor(millis / 60000);
+  int seconds = ((millis % 60000) / 1000);
+  return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
 }
