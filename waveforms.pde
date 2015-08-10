@@ -17,6 +17,7 @@ int scale;
 int h, s, b;
 
 void setup() {
+  smooth();
   size(600, 600);
   pixelDensity(2);
   colorMode(HSB);
