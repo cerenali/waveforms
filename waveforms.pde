@@ -112,6 +112,10 @@ void keyPressed() {
     song.rewind();
   }
   
+  if (key == 's') {
+    saveFrame("waveforms-###.png");
+  }
+  
   if (key == 'q') {
     exit();
   }
